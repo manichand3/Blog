@@ -33,6 +33,12 @@ const Home = () => {
     setFilterPosts(searchedPosts);
   }
 
+  //handlDelete
+  function handleDeletePost(index) {
+    setPosts(() => {
+      return posts.filter((posts, PostIndex) => PostIndex !== index);
+    });
+  }
   //localStorage
   useEffect(() => {
     const postsJson = JSON.stringify(posts);
@@ -131,6 +137,14 @@ const Home = () => {
               <p className="p-2 text-xl break-words w-[300px]">
                 content:---{post.content}
               </p>
+              <button
+                className="bg-black p-2 text-amber-50 rounded-md"
+                onClick={() => {
+                  handleDeletePost(index);
+                }}
+              >
+                delete
+              </button>
             </div>
           </div>
         );
