@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import handleSearch from "../utils/search";
+import handleDelete from "../utils/delete";
+import PostUI from "../components/PostUI.jsx";
 const Home = () => {
   const [showForm, setShowForm] = useState(false);
   const [posts, setPosts] = useState(() => {
@@ -9,7 +12,6 @@ const Home = () => {
   const [content, setContent] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [filterPosts, setFilterPosts] = useState([]);
-  console.log(title);
   function handlePost() {
     const newPost = { title, content };
     if (title.trim().length > 0 && content.trim().length > 0) {
@@ -22,41 +24,10 @@ const Home = () => {
     }
   }
 
-  //handleSearch
-
-  function handleSearch(input) {
-    setSearchInput(input);
-    console.log(searchInput);
-    const searchedPosts = posts.filter((post, index) => {
-      return post.title.toLowerCase().includes(input.toLowerCase());
-    });
-    setFilterPosts(searchedPosts);
-  }
-
-  //handlDelete
-  function handleDeletePost(index) {
-    setPosts(() => {
-      return posts.filter((posts, PostIndex) => PostIndex !== index);
-    });
-  }
-  //localStorage
   useEffect(() => {
     const postsJson = JSON.stringify(posts);
     localStorage.setItem("user-posts", postsJson);
   }, [posts]);
-  // useEffect(() => {
-  //   const saved = localStorage.getItem("user-posts");
-  //   if (saved) {
-  //     setPosts(JSON.parse(saved));
-  //   }
-  //   console.log("Loaded from localStorage:", saved);
-  const displayedPosts = searchInput
-    ? posts.filter((post) =>
-        post.title.toLowerCase().includes(searchInput.toLowerCase())
-      )
-    : posts;
-
-  // }, []);
 
   return (
     <div>
@@ -80,7 +51,9 @@ const Home = () => {
             placeholder="Search Posts by title"
             value={searchInput}
             onChange={(e) => {
-              handleSearch(e.target.value);
+              setSearchInput(e.target.value);
+              const searchedPosts = handleSearch(e.target.value, posts);
+              setFilterPosts(searchedPosts);
             }}
           ></input>
         </div>
@@ -129,24 +102,15 @@ const Home = () => {
       )}
       {(searchInput ? filterPosts : posts).map((post, index) => {
         return (
-          <div key={index}>
-            <div className="bg-cyan-700 m-2 rounded-md p-10 hover:bg-cyan-600 break-words w-[300px]">
-              <p className="p-2 font-bold text-blue-50 text-2xl">
-                Title:---{post.title}
-              </p>
-              <p className="p-2 text-xl break-words w-[300px]">
-                content:---{post.content}
-              </p>
-              <button
-                className="bg-black p-2 text-amber-50 rounded-md"
-                onClick={() => {
-                  handleDeletePost(index);
-                }}
-              >
-                delete
-              </button>
-            </div>
-          </div>
+          <PostUI
+            key={index}
+            post={post}
+            index={index}
+            onDelete={(i) => {
+              const updated = handleDelete(i, posts);
+              setPosts(updated);
+            }}
+          />
         );
       })}
     </div>
