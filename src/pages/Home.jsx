@@ -12,15 +12,42 @@ const Home = () => {
   const [content, setContent] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [filterPosts, setFilterPosts] = useState([]);
+  const [editToggle, setEditToggle] = useState(undefined);
+  console.log(editToggle);
+  // console.log(editPost);
+  useEffect(() => {
+    if (editToggle !== undefined && posts[editToggle]) {
+      const editPost = posts[editToggle];
+      setTitle(editPost.title);
+      setContent(editPost.content);
+      setShowForm(true); // 👈 Optional: auto open the form on edit
+    }
+  }, [editToggle]);
+
   function handlePost() {
     const newPost = { title, content };
     if (title.trim().length > 0 && content.trim().length > 0) {
-      setPosts([...posts, newPost]);
+      if (editToggle !== undefined) {
+        // Editing existing post
+        const updatedPosts = posts.map((post, i) => {
+          if (editToggle === i) {
+            return newPost; // Replace with updated content
+          } else {
+            return post; // Keep others as-is
+          }
+        });
+        setPosts(updatedPosts);
+        setEditToggle(undefined); // Reset edit state
+      } else {
+        // Adding new post
+        setPosts([...posts, newPost]);
+      }
+
       setContent("");
       setTitle("");
-      console.log(posts);
+      setShowForm(!showForm); // Optional: close form after post
     } else {
-      alert("please complete the fields");
+      alert("Please complete the fields");
     }
   }
 
@@ -31,8 +58,8 @@ const Home = () => {
 
   return (
     <div>
-      <div className="flex text-amber-950 font-bold text-3xl">
-        <p className="font-sans">My Mini Blog</p>
+      <div className="flex text-amber-950 font-bold text-3xl bg-black p-5 rounded-md justify-center">
+        <p className="font-sans bg-black text-amber-50">My Mini Blog</p>
       </div>
       <div className="flex justify-around m-6">
         <div>
@@ -106,6 +133,7 @@ const Home = () => {
             key={index}
             post={post}
             index={index}
+            setEditToggle={setEditToggle}
             onDelete={(i) => {
               const updated = handleDelete(i, posts);
               setPosts(updated);
